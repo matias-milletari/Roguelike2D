@@ -1,5 +1,4 @@
-﻿using System.Xml;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class Enemy : MovingObject
 {
@@ -15,7 +14,7 @@ public class Enemy : MovingObject
     {
         GameManager.instance.AddEnemyToList(this);
         animator = GetComponent<Animator>();
-        target = GameObject.FindGameObjectWithTag("Player").transform;
+        target = FindObjectOfType<Player>().transform;
         base.Start();
     }
 

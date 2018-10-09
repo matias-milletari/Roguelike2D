@@ -5,10 +5,10 @@ using UnityEngine.SceneManagement;
 public class Player : MovingObject
 {
     public int wallDamage = 1;
+    public int pointsPerAction = -1;
     public int pointsPerFood = 10;
     public int pointsPerSoda = 20;
     public float restartLevelDelay = 1f;
-    public Text foodText;
     public AudioClip moveSound1;
     public AudioClip moveSound2;
     public AudioClip eatSound1;
@@ -17,25 +17,22 @@ public class Player : MovingObject
     public AudioClip drinkSound2;
     public AudioClip gameOverSound;
 
+    public delegate void OnFoodModified(int food, bool isAction);
+    public static OnFoodModified ModifyFood;
+
     private Animator animator;
-    private int food;
     private Vector2 touchOrigin = -Vector2.one;
 
     protected override void Start()
     {
         animator = GetComponent<Animator>();
-        food = GameManager.instance.foodPoints;
-
-        foodText.text = "Food: " + food;
 
         base.Start();
     }
 
     protected override void AttemptMove<T>(int xDir, int yDir)
     {
-        food--;
-
-        foodText.text = "Food: " + food;
+        if (ModifyFood != null) ModifyFood(pointsPerAction, true);
 
         base.AttemptMove<T>(xDir, yDir);
 
@@ -45,8 +42,6 @@ public class Player : MovingObject
         {
             SoundManager.instance.RandomizeSfx(moveSound1, moveSound2);
         }
-
-        CheckIfGameOver();
 
         GameManager.instance.playersTurn = false;
     }
@@ -65,22 +60,6 @@ public class Player : MovingObject
         SceneManager.LoadScene(0);
     }
 
-    private void OnDisable()
-    {
-        GameManager.instance.foodPoints = food;
-    }
-
-    private void CheckIfGameOver()
-    {
-        if (food <= 0)
-        {
-            SoundManager.instance.PlaySingle(gameOverSound);
-            SoundManager.instance.musicAudioSource.Stop();
-
-            GameManager.instance.GameOver();
-        }
-    }
-
     private void Update()
     {
         if (!GameManager.instance.playersTurn) return;
@@ -88,7 +67,7 @@ public class Player : MovingObject
         var horizontal = 0;
         var vertical = 0;
 
-#if UNITY_EDITOR || UNITY_STANDALONE || UNITY_WEBPLAYER
+#if UNITY_EDITOR ||UNITY_STANDALONE || UNITY_WEBPLAYER
 
         horizontal = (int)Input.GetAxisRaw("Horizontal");
         vertical = (int)Input.GetAxisRaw("Vertical");
@@ -141,9 +120,7 @@ public class Player : MovingObject
         }
         else if (other.tag == "Food")
         {
-            food += pointsPerFood;
-
-            foodText.text = "+ " + pointsPerFood + " Food: " + food;
+            if (ModifyFood != null) ModifyFood(pointsPerFood, false);
 
             SoundManager.instance.RandomizeSfx(eatSound1, eatSound2);
 
@@ -151,9 +128,7 @@ public class Player : MovingObject
         }
         else if (other.tag == "Soda")
         {
-            food += pointsPerSoda;
-
-            foodText.text = "+ " + pointsPerSoda + " Food: " + food;
+            if (ModifyFood != null) ModifyFood(pointsPerSoda, false);
 
             SoundManager.instance.RandomizeSfx(drinkSound1, drinkSound2);
 
@@ -164,9 +139,7 @@ public class Player : MovingObject
     public void LoseFood(int foodLost)
     {
         animator.SetTrigger("Hit");
-        food -= foodLost;
 
-        foodText.text = "- " + pointsPerSoda + " Food: " + food;
-        CheckIfGameOver();
+        if (ModifyFood != null) ModifyFood(foodLost, false);
     }
 }
