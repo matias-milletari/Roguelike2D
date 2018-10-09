@@ -103,9 +103,4 @@ public class BoardManager : MonoBehaviour
 
         Instantiate(exit, new Vector3(columns - 1, rows - 1, 0f), Quaternion.identity, boardHolder);
     }
-
-    private void Start()
-    {
-        SetupScene(2);
-    }
 }

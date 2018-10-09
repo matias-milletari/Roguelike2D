@@ -4,6 +4,8 @@ public class Wall : MonoBehaviour
 {
     public Sprite damagedWall;
     public int healthPoints;
+    public AudioClip chopSound1;
+    public AudioClip chopSound2;
 
     private SpriteRenderer spriteRenderer;
 
@@ -16,6 +18,8 @@ public class Wall : MonoBehaviour
     {
         spriteRenderer.sprite = damagedWall;
         healthPoints -= damage;
+
+        SoundManager.instance.RandomizeSfx(chopSound1, chopSound2);
 
         if (healthPoints <= 0)
         {

@@ -1,19 +1,24 @@
 ﻿using System.Collections.Generic;
 using System.Collections;
 using UnityEngine;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
+    public float levelStartDelay = 2f;
+    public float turnDelay = .1f;
     public static GameManager instance;
     public int foodPoints = 100;
-    public float turnDelay = .1f;
     [HideInInspector] public bool playersTurn = true;
 
+    private Text levelText;
+    private GameObject levelImage;
     private BoardManager boardManager;
-    private int level = 3;
+    private int level;
     private List<Enemy> enemies;
     private bool enemiesMoving;
-
+    private bool doingSetup;
 
     private void Awake()
     {
@@ -31,13 +36,28 @@ public class GameManager : MonoBehaviour
         enemies = new List<Enemy>();
 
         boardManager = GetComponent<BoardManager>();
+    }
+
+    private void OnLevelFinishedLoading(Scene scene, LoadSceneMode mode)
+    {
+        level++;
 
         InitializeGame();
     }
 
+    void OnEnable()
+    {
+        SceneManager.sceneLoaded += OnLevelFinishedLoading;
+    }
+
+    void OnDisable()
+    {
+        SceneManager.sceneLoaded -= OnLevelFinishedLoading;
+    }
+
     private void Update()
     {
-        if (playersTurn || enemiesMoving)
+        if (playersTurn || enemiesMoving || doingSetup)
         {
             return;
         }
@@ -52,13 +72,29 @@ public class GameManager : MonoBehaviour
 
     public void GameOver()
     {
+        levelText.text = "After " + level + " days, you starved.";
+        levelImage.SetActive(true);
         enabled = false;
     }
 
     private void InitializeGame()
     {
+        doingSetup = true;
+
+        levelImage = GameObject.Find("LevelImage");
+        levelText = GameObject.Find("LevelText").GetComponent<Text>();
+        levelText.text = "Day " + level;
+        levelImage.SetActive(true);
+        Invoke("HideLevelImage", levelStartDelay);
+
         enemies.Clear();
         boardManager.SetupScene(level);
+    }
+
+    private void HideLevelImage()
+    {
+        levelImage.SetActive(false);
+        doingSetup = false;
     }
 
     private IEnumerator MoveEnemies()
