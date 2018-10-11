@@ -24,6 +24,16 @@ public class SoundManager : MonoBehaviour
         DontDestroyOnLoad(gameObject);
     }
 
+    private void OnEnable()
+    {
+        Food.SetGameOver += StopMusic;
+    }
+
+    private void OnDisable()
+    {
+        Food.SetGameOver -= StopMusic;
+    }
+
     public void PlaySingle(AudioClip clip)
     {
         sfxAudioSource.clip = clip;
@@ -39,5 +49,10 @@ public class SoundManager : MonoBehaviour
         sfxAudioSource.pitch = randomPitch;
         sfxAudioSource.clip = clips[randomIndex];
         sfxAudioSource.Play();
+    }
+
+    private void StopMusic()
+    {
+        musicAudioSource.Stop();
     }
 }

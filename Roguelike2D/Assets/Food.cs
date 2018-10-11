@@ -3,6 +3,9 @@ using UnityEngine.UI;
 
 public class Food : MonoBehaviour
 {
+    public delegate void OnGameOver();
+    public static OnGameOver SetGameOver;
+
     private Text foodText;
     private int food;
 
@@ -37,17 +40,12 @@ public class Food : MonoBehaviour
         else
         {
             foodText.text = foodAmount < 0
-                ? ("- " + foodAmount + " Food: " + food)
+                ? ("- " + Mathf.Abs(foodAmount) + " Food: " + food)
                 : ("+ " + foodAmount + " Food: " + food);
         }
-    }
 
-    private void CheckGameOver()
-    {
-        if (food >= 0) return;
+        if (food > 0) return;
 
-        //SoundManager.instance.PlaySingle(gameOverSound);
-        SoundManager.instance.musicAudioSource.Stop();
-        GameManager.instance.GameOver();
+        if (SetGameOver != null) SetGameOver();
     }
 }

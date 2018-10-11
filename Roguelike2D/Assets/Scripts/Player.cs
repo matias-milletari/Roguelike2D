@@ -1,14 +1,11 @@
 ﻿using UnityEngine;
-using UnityEngine.UI;
-using UnityEngine.SceneManagement;
 
 public class Player : MovingObject
 {
     public int wallDamage = 1;
-    public int pointsPerAction = -1;
+    public int pointsPerAction = 1;
     public int pointsPerFood = 10;
     public int pointsPerSoda = 20;
-    public float restartLevelDelay = 1f;
     public AudioClip moveSound1;
     public AudioClip moveSound2;
     public AudioClip eatSound1;
@@ -19,6 +16,9 @@ public class Player : MovingObject
 
     public delegate void OnFoodModified(int food, bool isAction);
     public static OnFoodModified ModifyFood;
+
+    public delegate void OnRestartGame();
+    public static OnRestartGame RestartGame;
 
     private Animator animator;
     private Vector2 touchOrigin = -Vector2.one;
@@ -32,7 +32,7 @@ public class Player : MovingObject
 
     protected override void AttemptMove<T>(int xDir, int yDir)
     {
-        if (ModifyFood != null) ModifyFood(pointsPerAction, true);
+        if (ModifyFood != null) ModifyFood(-pointsPerAction, true);
 
         base.AttemptMove<T>(xDir, yDir);
 
@@ -53,11 +53,6 @@ public class Player : MovingObject
         hitWall.DamageWall(wallDamage);
 
         animator.SetTrigger("Chop");
-    }
-
-    private void Restart()
-    {
-        SceneManager.LoadScene(0);
     }
 
     private void Update()
@@ -116,7 +111,7 @@ public class Player : MovingObject
     {
         if (other.tag == "Exit")
         {
-            Invoke("Restart", restartLevelDelay);
+            if (RestartGame != null) RestartGame();
         }
         else if (other.tag == "Food")
         {
@@ -140,6 +135,6 @@ public class Player : MovingObject
     {
         animator.SetTrigger("Hit");
 
-        if (ModifyFood != null) ModifyFood(foodLost, false);
+        if (ModifyFood != null) ModifyFood(-foodLost, false);
     }
 }
