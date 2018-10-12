@@ -6,6 +6,7 @@ using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
+    public float restartLevelDelay = 1f;
     public float levelStartDelay = 2f;
     public float turnDelay = .1f;
     public static GameManager instance;
@@ -48,11 +49,15 @@ public class GameManager : MonoBehaviour
     void OnEnable()
     {
         SceneManager.sceneLoaded += OnLevelFinishedLoading;
+        Food.SetGameOver += GameOver;
+        Player.RestartGame += RestartGame;
     }
 
     void OnDisable()
     {
         SceneManager.sceneLoaded -= OnLevelFinishedLoading;
+        Food.SetGameOver -= GameOver;
+        Player.RestartGame -= RestartGame;
     }
 
     private void Update()
@@ -115,5 +120,15 @@ public class GameManager : MonoBehaviour
 
         playersTurn = true;
         enemiesMoving = false;
+    }
+
+    private void RestartGame()
+    {
+        Invoke("LoadScene", restartLevelDelay);
+    }
+
+    private void LoadScene()
+    {
+        SceneManager.LoadScene(0);
     }
 }
