@@ -39,6 +39,11 @@ public class GameManager : MonoBehaviour
         boardManager = GetComponent<BoardManager>();
     }
 
+    public BoardManager BoardManager
+    {
+        get { return boardManager; }
+    }
+
     private void OnLevelFinishedLoading(Scene scene, LoadSceneMode mode)
     {
         level++;
@@ -46,14 +51,14 @@ public class GameManager : MonoBehaviour
         InitializeGame();
     }
 
-    void OnEnable()
+    private void OnEnable()
     {
         SceneManager.sceneLoaded += OnLevelFinishedLoading;
         Food.SetGameOver += GameOver;
         Player.RestartGame += RestartGame;
     }
 
-    void OnDisable()
+    private void OnDisable()
     {
         SceneManager.sceneLoaded -= OnLevelFinishedLoading;
         Food.SetGameOver -= GameOver;
